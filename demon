@@ -1,0 +1,55 @@
+Пишем демона для Ubuntu 
+ 
+1) Создаем по  пути /home/arpcash.sh скрипт с содержимым: 
+#!/bin/bash 
+ARPD=”$(arp -i eth0)" 
+echo $ARPD >> /var/log/arplog 
+sleep 60 
+ 
+2) Превращаем его в исполняемый файл и проверяем работу: 
+chmod u+x /home/arpcash.sh 
+touch /var/log/arplog 
+/home/arpcash.sh 
+tail /var/log/arplog 
+ 
+3) Пишу в файл /etc/init.d/arpdemon скрипт для демона: 
+#!/bin/bash 
+# chkconfig: 2345 20 80 
+# description: arpdemon
+# Source function library. 
+. /etc/init.d/functions 
+  
+case "$1" in 
+start) 
+   echo "$(date) arpdemon started" >> /var/log/arplog 
+   /home/arpcash.sh & 
+   echo $!>/var/run/arpdemon.pid 
+   ;; 
+stop) 
+   echo "$(date) arpdemon stopped" >> /var/log/arplog
+   kill `cat /var/run/arpdemon.pid` 
+   rm /var/run/arpdemon.pid 
+   ;; 
+restart) 
+   $0 stop 
+   $0 start 
+   ;; 
+status) 
+   if [ -e /var/run/arpdemon.pid ]; then 
+      echo arpdemon is running, pid=$ (cat /var/run/arpdemon.pid) 
+   else 
+      echo arpdemon is NOT running 
+      exit 1 
+   fi 
+   ;; 
+*) 
+   echo "Usage: $0 {start|stop|status|restart}" 
+esac 
+  
+exit 0 
+ 
+4) Делаю скрипт исполняемым и добавляю в автозапуск и проверяю его работу: 
+sudo chmod u+x /etc/init.d/arpdemon
+chkconfig arpdemon on 
+service arpdemon start 
+service arpdemon status 
