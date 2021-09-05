@@ -1,18 +1,20 @@
-Пишем демона для Ubuntu 
+#Пишем демона для Ubuntu 
  
-1) Создаем по  пути /home/arpcash.sh скрипт с содержимым: 
+# Создаем по  пути /home/arpcash.sh скрипт с содержимым: 
+
 #!/bin/bash 
 ARPD=”$(arp -i eth0)" 
 echo $ARPD >> /var/log/arplog 
 sleep 60 
  
-2) Превращаем его в исполняемый файл и проверяем работу: 
+# Превращаем его в исполняемый файл и проверяем работу: 
 chmod u+x /home/arpcash.sh 
 touch /var/log/arplog 
 /home/arpcash.sh 
 tail /var/log/arplog 
  
-3) Пишу в файл /etc/init.d/arpdemon скрипт для демона: 
+# Пишу в файл /etc/init.d/arpdemon скрипт для демона: 
+
 #!/bin/bash 
 # chkconfig: 2345 20 80 
 # description: arpdemon
@@ -48,7 +50,8 @@ esac 
   
 exit 0 
  
-4) Делаю скрипт исполняемым и добавляю в автозапуск и проверяю его работу: 
+#Делаю скрипт исполняемым и добавляю в автозапуск и проверяю его работу: 
+
 sudo chmod u+x /etc/init.d/arpdemon
 chkconfig arpdemon on 
 service arpdemon start 
